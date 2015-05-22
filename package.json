@@ -1,0 +1,44 @@
+{
+    "name": "gnome-download-notify",
+    "title": "Gnome Download Notifications",
+    "id": "jid1-PwmzPFn3oNFePA",
+    "description": "Gnome notification integration for downloads. Requires notify-send",
+    "author": "ion201",
+    "license": "MPL 2.0",
+    "version": "0.1",
+    "preferences": [{
+        "name": "exec_path",
+        "title": "notify-send path",
+        "description": "Path to notify-send executable",
+        "type": "string",
+        "value": "/usr/bin/notify-send"
+    },
+    {
+        "name": "icon_path",
+        "title": "Icon path",
+        "description": "Path to icon to use in notification. Leave blank to use the default firefox icon",
+        "type": "string",
+        "value": ""
+    },
+    {
+        "name": "notify_timeout",
+        "title": "Notification timeout",
+        "description": "Does not work on all systems",
+        "type": "integer",
+        "value": 5
+    },
+    {
+        "name": "is_transient",
+        "title": "Transient notifications",
+        "description": "do not leave notifications in system tray",
+        "type": "bool",
+        "value": false
+    },
+    {
+        "name": "custom_args",
+        "title": "Custom args",
+        "description": "",
+        "type": "string",
+        "value": ""
+    }]
+}
