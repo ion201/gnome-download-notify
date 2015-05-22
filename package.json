@@ -4,7 +4,7 @@
     "id": "jid1-PwmzPFn3oNFePA",
     "description": "Gnome notification integration for downloads. Requires notify-send",
     "author": "ion201",
-    "license": "MPL 2.0",
+    "license": "MIT",
     "version": "0.1",
     "preferences": [{
         "name": "exec_path",
