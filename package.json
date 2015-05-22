@@ -10,14 +10,21 @@
         "name": "exec_path",
         "title": "notify-send path",
         "description": "Path to notify-send executable",
-        "type": "string",
+        "type": "file",
         "value": "/usr/bin/notify-send"
+    },
+    {
+        "name": "use_custom_icon",
+        "title": "Use custom icon",
+        "description": "If checked, use the icon specified below rather than the default",
+        "type": "bool",
+        "value": false
     },
     {
         "name": "icon_path",
         "title": "Icon path",
-        "description": "Path to icon to use in notification. Leave blank to use the default firefox icon",
-        "type": "string",
+        "description": "Path to icon to use in notification.",
+        "type": "file",
         "value": ""
     },
     {
