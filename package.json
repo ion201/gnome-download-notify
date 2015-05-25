@@ -28,18 +28,25 @@
         "value": ""
     },
     {
-        "name": "notify_timeout",
-        "title": "Notification timeout",
-        "description": "Does not work on all systems",
-        "type": "integer",
-        "value": 5
-    },
-    {
-        "name": "is_transient",
-        "title": "Transient notifications",
-        "description": "do not leave notifications in system tray",
+        "name": "enforce_transient",
+        "title": "Only transient notifications",
+        "description": "No notifications will remain in system tray",
         "type": "bool",
         "value": false
+    },
+    {
+        "name": "transient_before_time",
+        "title": "Transient notifications timing",
+        "description": "Use transient notifications for downloads faster than this time (in ms). Set to 0 to disable transient notifications",
+        "type": "integer",
+        "value": 5000
+    },
+    {
+        "name": "notify_timeout",
+        "title": "Notification timeout",
+        "description": "Notification timeout (in ms). Will work when notify-send devs actually implement this option",
+        "type": "integer",
+        "value": 5000
     },
     {
         "name": "custom_args",
