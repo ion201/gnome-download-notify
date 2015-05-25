@@ -5,7 +5,7 @@
     "description": "Gnome notification integration for downloads. Requires notify-send",
     "author": "ion201",
     "license": "MIT",
-    "version": "0.1",
+    "version": "0.2",
     "preferences": [{
         "name": "exec_path",
         "title": "notify-send path",
