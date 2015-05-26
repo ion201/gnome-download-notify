@@ -1,11 +1,12 @@
 {
     "name": "gnome-download-notify",
     "title": "Gnome Download Notifications",
-    "id": "jid1-PwmzPFn3oNFePA",
+    "id": "gnome-download-notify@ion201",
     "description": "Gnome notification integration for downloads. Requires notify-send",
     "author": "ion201",
     "license": "MIT",
-    "version": "0.2",
+    "version": "0.2.0",
+    "main": "lib/main.js",
     "preferences": [{
         "name": "exec_path",
         "title": "notify-send path",
