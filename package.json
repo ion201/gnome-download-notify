@@ -31,7 +31,7 @@
     {
         "name": "enforce_transient",
         "title": "Only transient notifications",
-        "description": "No notifications will remain in system tray",
+        "description": "All notifications will be transient. Ignores the next option",
         "type": "bool",
         "value": false
     },
