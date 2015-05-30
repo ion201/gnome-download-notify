@@ -29,6 +29,13 @@
         "value": ""
     },
     {
+        "name": "ignore_tmp",
+        "title": "Ignore temp files",
+        "description": "Ignore temporary file downloads",
+        "type": "bool",
+        "value": true
+    },
+    {
         "name": "enforce_transient",
         "title": "Only transient notifications",
         "description": "All notifications will be transient. Ignores the next option",
