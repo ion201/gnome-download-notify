@@ -5,7 +5,7 @@
     "description": "Gnome notification integration for downloads. Requires notify-send",
     "author": "ion201",
     "license": "MIT",
-    "version": "0.2.0",
+    "version": "0.3.0",
     "main": "lib/main.js",
     "preferences": [{
         "name": "exec_path",
@@ -45,7 +45,7 @@
     {
         "name": "transient_before_time",
         "title": "Transient notifications timing",
-        "description": "Use transient notifications for downloads faster than this time (in ms). Set to 0 to disable transient notifications",
+        "description": "Use transient notifications for downloads completed quicker than this time (in ms). Set to 0 to disable transient notifications",
         "type": "integer",
         "value": 5000
     },
@@ -55,12 +55,5 @@
         "description": "Notification timeout (in ms). Will work when notify-send devs actually implement this option",
         "type": "integer",
         "value": 5000
-    },
-    {
-        "name": "custom_args",
-        "title": "Custom args",
-        "description": "",
-        "type": "string",
-        "value": ""
     }]
 }
