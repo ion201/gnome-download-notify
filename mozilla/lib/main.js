@@ -12,15 +12,23 @@ var activeDownloads = [];
 
 function onDlAdded(download){
     // Downloads are uniquely identified by target path
-    activeDownloads.push(download.target.path);
+    activeDownloads.push(download.startTime.valueOf());
 }
 
 
 function onDlChange(download){
-    if (!download.stopped)
+    if (!download.stopped){
+        if (activeDownloads.indexOf(download.startTime.valueOf()) === -1)
+            activeDownloads.push(download.startTime.valueOf());
         return;
+    }
 
-    if (activeDownloads.indexOf(download.target.path) === -1)
+    if (download.canceled){
+        activeDownloads.splice(activeDownloads.indexOf(download.startTime.valueOf()), 1);
+        return;
+    }
+
+    if (activeDownloads.indexOf(download.startTime.valueOf()) === -1)
         return;
 
     if (prefs.ignore_tmp && download.target.path.startsWith('/tmp'))
@@ -41,15 +49,16 @@ function onDlChange(download){
     if (prefs.enforce_transient || (Date.now() - download.startTime.valueOf()) < prefs.transient_before_time)
         args.push('-h', 'int:transient:1');
     args.push('-t', prefs.notify_timeout);
-    if (prefs.custom_args)
-        Array.prototype.push.apply(args, prefs.custom_args.split(' '));
 
     var p = download.target.path.split('/');
     var filename = p.pop(p.length-1);
-    args.push('Download completed: ' + filename, 'File saved to ' + p.join('/'));
+    if (download.succeeded){
+        args.push('Download completed: ' + filename, 'File saved to ' + p.join('/'));
+    } else if (download.error !== null)
+        args.push('Download interrupted: ' + filename);
 
+    activeDownloads.splice(activeDownloads.indexOf(download.startTime.valueOf()), 1);
     process.run(false, args, args.length);
-    activeDownloads.splice(activeDownloads.indexOf(download.target.path), 1);
 }
 
 
