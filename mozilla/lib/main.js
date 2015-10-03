@@ -11,7 +11,7 @@ Cu.import('resource://gre/modules/Task.jsm');
 var activeDownloads = [];
 
 function onDlAdded(download){
-    // Downloads are uniquely identified by target path
+    // Downloads are uniquely identified by start time
     activeDownloads.push(download.startTime.valueOf());
 }
 
