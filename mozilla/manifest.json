@@ -17,7 +17,8 @@
     },
 
     "icons": {
-        "16": "assets/icon64.png"
+        "48": "assets/icon48.png",
+        "96": "assets/icon96.png"
     },
 
     "options_ui": {

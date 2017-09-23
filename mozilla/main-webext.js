@@ -53,6 +53,7 @@ function loadPrefs(callback)
     getter.then(getAllPrefs, onError);
 }
 
+
 function notify(summary, body, timeMs, filepath, downloadId)
 {
     loadPrefs(doNotifyWithPrefs);
@@ -81,6 +82,7 @@ function notify(summary, body, timeMs, filepath, downloadId)
     }
 }
 
+
 function onNotifClicked(notificationId)
 {
     if (notificationId.search(NOTIF_IDENTIFIER) == -1)
@@ -95,6 +97,7 @@ function onNotifClicked(notificationId)
     // opening.then(function (){}, function (error){console.log(`error = ${error}`)});
 }
 
+
 function dlComplete(download_list)
 {
     download = download_list[0];
@@ -108,8 +111,9 @@ function dlComplete(download_list)
 
     if (download.state == browser.downloads.State.COMPLETE)
     {
-        summary = 'Download completed: ' + filename;
-        body = 'File saved in ' + filepath.join('/');
+        summary = 'Download Complete: "' + filename + '"';
+        body = 'File: "' + filename + '"\n';
+        body += 'Saved in ' + filepath.join('/');
     }
     else if (download.error != null)
     {
@@ -130,11 +134,13 @@ function dlComplete(download_list)
     notify(summary, body, timeMs, download.filename, download.id);
 }
 
+
 function onSearchError(error)
 {
     console.log('Error on searching!');
     console.log(error);
 }
+
 
 function onDlChange(download)
 {
