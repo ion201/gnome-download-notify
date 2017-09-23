@@ -1,4 +1,4 @@
-# Gnome Download Notifications
+# Download Notifications
 
 Send notifications when downloads are compelted. Now with 100% more webextension.
 
