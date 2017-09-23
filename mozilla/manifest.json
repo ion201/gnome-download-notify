@@ -1,0 +1,26 @@
+{
+    "manifest_version": 2,
+    "name": "Download Notifications",
+    "description": "Notification integration for downloads.",
+    "version": "1.0.0",
+    "permissions": ["downloads", "storage", "notifications"],
+
+    "applications": {
+        "gecko": {
+            "id": "download-notifications@ion201",
+            "strict_min_version": "42.0"
+        }
+    },
+
+    "background": {
+        "scripts": ["main-webext.js"]
+    },
+
+    "icons": {
+        "16": "assets/icon64.png"
+    },
+
+    "options_ui": {
+        "page": "pref/pref.html"
+    }
+}

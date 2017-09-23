@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        .col1 {
+            padding-right: 20%;
+            padding-top: 15px;
+            padding-bottom: 15px;
+        }
+        .col2 {
+            text-align: center;
+            padding-top: 15px;
+            padding-bottom: 15px;
+        }
+        input[type=number] {
+            width: 80px;
+        }
+        input[type=checkbox] {
+            -moz-transform: scale(1.25);
+        }
+        tr {
+            border: solid;
+            border-width: 1px 0;
+            border-color: #bbbbbb;
+        }
+    </style>
+</head>
+
+<body>
+
+    <form id="prefsForm">
+        <table border="1" frame="void" rules="rows">
+            <tr>
+                <td class="col1">
+                    <label>
+                        <strong>Ignore temp files</strong>
+                        <br>
+                        Ignore temporary file downloads
+                    </label>
+                </td>
+                <td class="col2">
+                    <input type="checkbox" id="ignore_tmp" >
+                </td>
+            </tr>
+            <tr>
+                <td class="col1">
+                    <label>
+                        <strong>Only transient notifications</strong>
+                        <br>
+                        All notifications will be transient. Ignores the next option
+                    </label>
+                </td>
+                <td class="col2">
+                    <input type="checkbox" id="enforce_transient" >
+                </td>
+            </tr>
+            <tr>
+                <td class="col1">
+                    <label>
+                        <strong>Transient notifications timing</strong>
+                        <br>
+                        Use transient notifications for downloads completed quicker than this time (in ms).
+                        Set to 0 to disable transient notifications
+                    </label>
+                </td>
+                <td class="col2">
+                    <input type="number" id="transient_before_time" min="0" >
+                </td>
+            </tr>
+            <tr>
+                <td class="col1">
+                    <label>
+                        <strong>Notification Timeout</strong>
+                        <br>
+                        Transient notifications will timeout after this much time has passed (in ms).
+                    </label>
+                </td>
+                <td class="col2">
+                    <input type="number" id="notif_timeout" min="1" >
+                </td>
+            </tr>
+            <tr>
+                <td class="col1">
+                </td>
+                <td class="col2">
+                    <button type="submit" id="savePrefs">Save</button>
+                </td>
+            </tr>
+        </table>
+        <br>
+    </form>
+
+    <script src="pref.js"></script>
+
+</body>
+
+</html>
