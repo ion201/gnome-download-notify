@@ -7,7 +7,7 @@
 
     "applications": {
         "gecko": {
-            "id": "download-notifications@ion201",
+            "id": "gnome-download-notify@ion201",
             "strict_min_version": "42.0"
         }
     },
