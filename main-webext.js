@@ -68,7 +68,7 @@ function notify(summary, body, timeMs, filepath, downloadId)
         var notifId = downloadId.toString() + NOTIF_IDENTIFIER;
         var notif = browser.notifications.create(notifId, {
                         'type': 'basic',
-                        'iconUrl': browser.extension.getURL('assets/default16.png'),
+                        'iconUrl': browser.extension.getURL('assets/default48.png'),
                         'title': summary,
                         'message': body
                     });
