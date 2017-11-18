@@ -4,6 +4,10 @@ var DEFAULT_notif_timeout = 5000;
 
 var NOTIF_IDENTIFIER = '-notif';
 
+var notified_dls = []
+// Note: This only stores a hash, not any details
+var RECENT_DOWNLOADS_MAX_SIZE = 32
+
 function loadPrefs(callback)
 {
     var prefs = Object();
@@ -98,6 +102,36 @@ function onNotifClicked(notificationId)
 }
 
 
+function hashDlObject(download)
+{
+    var s = download.startTime + '--' + download.id.toString();
+    var hash = 0;
+    for (i = 0; i < s.length; i++) {
+        char = s.charCodeAt(i);
+        hash = ((hash<<5)-hash)+char;
+        hash = hash & hash; // Convert to 32bit integer
+    }
+    return hash;
+}
+
+
+function isDlAlreadyNotified(download)
+{
+    // No need to store exact download details so a hash will suffice
+    var hash = hashDlObject(download);
+    if (notified_dls.length > RECENT_DOWNLOADS_MAX_SIZE)
+    {
+        notified_dls.splice(0, RECENT_DOWNLOADS_MAX_SIZE-notified_dls.length);
+    }
+    if (notified_dls.indexOf(hash) == -1)
+    {
+        notified_dls.push(hash);
+        return false;
+    }
+    return true;
+}
+
+
 function dlComplete(download_list)
 {
     download = download_list[0];
@@ -109,13 +143,15 @@ function dlComplete(download_list)
     var summary;
     var body;
 
-    if (download.state == browser.downloads.State.COMPLETE)
+    var isAlreadyNotified = isDlAlreadyNotified(download);
+
+    if (download.state == browser.downloads.State.COMPLETE && !isAlreadyNotified)
     {
         summary = 'Download Complete: "' + filename + '"';
         body = 'File: "' + filename + '"\n';
         body += 'Saved in ' + filepath.join('/');
     }
-    else if (download.error != null)
+    else if (download.error != null && !isAlreadyNotified)
     {
         if ((download.error == browser.downloads.InterruptReason.USER_SHUTDOWN) ||
                 (download.error == browser.downloads.InterruptReason.USER_CANCELED))
