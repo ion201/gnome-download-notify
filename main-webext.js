@@ -68,7 +68,9 @@ function notify(summary, body, timeMs, filepath, downloadId)
         {
             if (filepath.startsWith('/tmp') ||  // Linux / (probably) OSX
                     (filepath.indexOf('Local\\Temp') != -1)) // Windoze
-            return;
+            {
+                return;
+            }
         }
 
         var notifId = downloadId.toString() + NOTIF_IDENTIFIER;
