@@ -64,8 +64,10 @@ function notify(summary, body, timeMs, filepath, downloadId)
 
     function doNotifyWithPrefs(prefs)
     {
-        if (prefs.ignore_tmp && filepath.startsWith('/tmp'))
+        if (prefs.ignore_tmp)
         {
+            if (filepath.startsWith('/tmp') ||  // Linux / (probably) OSX
+                    (filepath.indexOf('Local\\Temp') != -1)) // Windoze
             return;
         }
 
@@ -94,7 +96,7 @@ function onNotifClicked(notificationId)
         return;
     }
 
-    // This doesn't work
+    // This doesn't work - https://bugzilla.mozilla.org/show_bug.cgi?id=1402612
     // var downloadId = parseInt(notificationId);
     //
     // var opening = browser.downloads.open(downloadId);
