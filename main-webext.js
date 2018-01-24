@@ -1,6 +1,12 @@
 
-var DEFAULT_transient_before_time = 5000;
-var DEFAULT_notif_timeout = 5000;
+function reqListener(e)
+{
+    window.addonConfig = JSON.parse(this.responseText);
+}
+var dataReq = new XMLHttpRequest();
+dataReq.onload = reqListener;
+dataReq.open('GET', 'pref/config.json');
+dataReq.send();
 
 var NOTIF_IDENTIFIER = '-notif';
 
@@ -13,37 +19,13 @@ function loadPrefs(callback)
     var prefs = Object();
     function getAllPrefs(result)
     {
-        if (result.ignore_tmp === undefined || result.ignore_tmp.toString()  == 'true')
+        for (var key in window.addonConfig)
         {
-            prefs.ignore_tmp = true;
+            prefs[key] = window.addonConfig[key].defaultValue;
         }
-        else
+        for (var key in result)
         {
-            prefs.ignore_tmp = false;
-        }
-        if (result.enforce_transient === undefined || result.enforce_transient.toString()  == 'true')
-        {
-            prefs.enforce_transient = true;
-        }
-        else
-        {
-            prefs.enforce_transient = false;
-        }
-        if (result.transient_before_time !== undefined)
-        {
-            prefs.transient_before_time = result.transient_before_time;
-        }
-        else
-        {
-            prefs.transient_before_time = DEFAULT_transient_before_time;
-        }
-        if (result.notif_timeout !== undefined)
-        {
-            prefs.notif_timeout = result.notif_timeout;
-        }
-        else
-        {
-            prefs.notif_timeout = DEFAULT_notif_timeout;
+            prefs[key] = result[key];
         }
         callback(prefs);
     }
@@ -72,6 +54,10 @@ function notify(summary, body, timeMs, filepath, downloadId)
                 return;
             }
         }
+        if (timeMs < prefs.no_notify_shorter_than*1000)
+        {
+            return;
+        }
 
         var notifId = downloadId.toString() + NOTIF_IDENTIFIER;
         var notif = browser.notifications.create(notifId, {
@@ -85,7 +71,7 @@ function notify(summary, body, timeMs, filepath, downloadId)
         {
             setTimeout(function(){
                     browser.notifications.clear(notifId);
-                }, parseInt(prefs.notif_timeout));
+                }, prefs.notif_timeout);
         }
     }
 }
@@ -177,8 +163,7 @@ function dlComplete(download_list)
 
 function onSearchError(error)
 {
-    console.log('Error on searching!');
-    console.log(error);
+    console.log(`search error = ${error}`);
 }
 
 

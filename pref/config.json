@@ -1,0 +1,43 @@
+
+{
+    "ignore_tmp":
+    {
+        "type": "bool",
+        "defaultValue": false,
+        "name": "Ignore temp files",
+        "description": "Never notify for files saved to temp directories."
+    },
+    "enforce_transient":
+    {
+        "type": "bool",
+        "defaultValue": false,
+        "name": "Always automatically dismiss notifications",
+        "description": "All notifications will automatically be dismissed after the specified timeout"
+    },
+    "transient_before_time":
+    {
+        "type": "int",
+        "defaultValue": 0,
+        "min": 0,
+        "step": 100,
+        "name": "Automatically dismiss quick downloads",
+        "description": "Automatically dismiss downloads completed quicker than this time (in ms). Set to 0 to never automatically dismiss downloads."
+    },
+    "notif_timeout":
+    {
+        "type": "int",
+        "defaultValue": 5000,
+        "min": 100,
+        "step": 100,
+        "name": "Notification Timeout",
+        "description": "When a notification is set to automatically be dismissed, set the timeout to this value (in ms)."
+    },
+    "no_notify_shorter_than":
+    {
+        "type": "int",
+        "defaultValue": 0,
+        "min": 0,
+        "name": "Don't Notify For Quick Downloads",
+        "description": "Don't send a notification for downloads quicker than this time (in seconds). If set to zero, no notifiations will be skipped. "
+    }
+}

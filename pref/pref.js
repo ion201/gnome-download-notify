@@ -1,79 +1,162 @@
 
-var DEFAULT_transient_before_time = '5000';
-var DEFAULT_notif_timeout = '5000';
-
-function savePrefs(e)
+function reqListener(e)
 {
-    e.preventDefault();
-    var ignore_tmp = 'false';
-    if (document.querySelector('#ignore_tmp').checked)
+    window.addonConfig = JSON.parse(this.responseText);
+}
+var dataReq = new XMLHttpRequest();
+dataReq.onload = reqListener;
+dataReq.overrideMimeType("application/json");
+dataReq.open('GET', 'config.json');
+dataReq.send();
+function waitForConfigLoad()
+{
+    if (window.addonConfig)
     {
-        ignore_tmp = 'true';
+        buildWebpage();
+        restorePrefs();
     }
-    var enforce_transient = 'false';
-    if (document.querySelector('#enforce_transient').checked)
+    else
     {
-        enforce_transient = 'true';
+        window.setTimeout(waitForConfigLoad, 10);
     }
-    var transient_before_time = DEFAULT_transient_before_time;
-    if (document.querySelector('#transient_before_time').value !== undefined)
+}
+
+
+function buildWebpage()
+{
+    var lastRow = document.querySelector('#prefsLastRow');
+
+    for (var key in window.addonConfig)
     {
-        transient_before_time = document.querySelector('#transient_before_time').value.toString()
-        if (parseInt(transient_before_time) < 0)
+        var name = window.addonConfig[key].name;
+        var inputId = key;
+        var description = window.addonConfig[key].description;
+        var typeSpecific = "";
+        if (window.addonConfig[key].type == 'bool')
         {
-            transient_before_time = '0';
+            typeSpecific = 'type="checkbox"';
+        }
+        else if (window.addonConfig[key].type == 'int')
+        {
+            typeSpecific = 'type="number"';
+            if (window.addonConfig[key].min !== undefined)
+            {
+                typeSpecific += ` min="${window.addonConfig[key].min}"`;
+            }
+            if (window.addonConfig[key].max !== undefined)
+            {
+                typeSpecific += ` max="${window.addonConfig[key].max}"`;
+            }
+            if (window.addonConfig[key].step !== undefined)
+            {
+                typeSpecific += ` step="${window.addonConfig[key].step}"`;
+            }
+        }
+        var tableRow = `
+        <tr>
+            <td class="col1">
+                <label>
+                    <strong>${name}</strong>
+                    <br>
+                    ${description}
+                </label>
+            </td>
+            <td class="col2">
+                <input ${typeSpecific} id="${inputId}" >
+            </td>
+        </tr>`;
+        var template = document.createElement('template');
+        template.innerHTML = tableRow.trim();
+        template.content.firstChild.addEventListener('change', fieldUpdated);
+        lastRow.parentNode.insertBefore(template.content.firstChild, lastRow);
+    }
+}
+
+
+function savePrefs()
+{
+    var preferences = Object();
+    for (var key in window.addonConfig)
+    {
+        var inputElem = document.querySelector('#' + key);
+        if (inputElem === undefined)
+        {
+            console.log("DL NOTIFICATIONS ERROR - config element not found in page: " + key);
+            continue;
+        }
+        if (window.addonConfig[key].type == 'bool')
+        {
+            preferences[key] = inputElem.checked || false;
+        }
+        else if (window.addonConfig[key].type == 'int')
+        {
+            preferences[key] = inputElem.value;
+            if ((window.addonConfig[key].min !== undefined)
+                    && (preferences[key] < window.addonConfig[key].min))
+            {
+                preferences[key] = window.addonConfig[key].min;
+            }
+            if ((window.addonConfig[key].max !== undefined)
+                    && (preferences[key] > window.addonConfig[key].max))
+            {
+                preferences[key] = window.addonConfig[key].max;
+            }
+        }
+        else
+        {
+            console.log("DL NOTIFICATIONS ERROR - config type not recognized: " + window.addonConfig[key].type);
+            continue;
         }
     }
-    if (document.querySelector('#notif_timeout').value !== undefined)
-    {
-        notif_timeout = document.querySelector('#notif_timeout').value.toString()
-        if (parseInt(notif_timeout) < 100)
-        {
-            notif_timeout = '100';
-        }
-    }
-    // console.log(enforce_transient);
-    browser.storage.local.set({
-            ignore_tmp: (ignore_tmp == 'true'),
-            enforce_transient: (enforce_transient == 'true'),
-            transient_before_time: parseInt(transient_before_time),
-            notif_timeout: parseInt(notif_timeout)
-        });
+
+    browser.storage.local.set(preferences);
 }
 
 function restorePrefs()
 {
-    function set_ignore_tmp(result)
+    function setAllValues(result)
     {
-        if (result.ignore_tmp === undefined || result.ignore_tmp.toString()  == 'true')
+        for (var key in window.addonConfig)
         {
-            document.querySelector('#ignore_tmp').value = 'true';
-            document.querySelector('#ignore_tmp').checked = true;
+            var inputElem = document.querySelector('#' + key);
+            if (inputElem === undefined)
+            {
+                console.log("DL NOTIFICATIONS ERROR - config element not found in page: " + key);
+                continue;
+            }
+            if (window.addonConfig[key].type == 'bool')
+            {
+                var isEnabled;
+                if (result[key] !== undefined)
+                {
+                    isEnabled = result[key]
+                }
+                else
+                {
+                    isEnabled = window.addonConfig[key].defaultValue;
+                }
+                if (isEnabled)
+                {
+                    inputElem.checked = true;
+                }
+            }
+            else if (window.addonConfig[key].type == 'int')
+            {
+                if (result[key] !== undefined)
+                {
+                    inputElem.value = result[key];
+                }
+                else
+                {
+                    inputElem.value = window.addonConfig[key].defaultValue;
+                }
+            }
+            else
+            {
+                console.log("DL NOTIFICATIONS ERROR - config type not recognized: " + window.addonConfig[key].type);
+                continue;
+            }
         }
-        else
-        {
-            document.querySelector('#ignore_tmp').value = 'false';
-        }
-    }
-    function set_enforce_transient(result)
-    {
-        if (result.enforce_transient === undefined || result.enforce_transient.toString() == 'true')
-        {
-            document.querySelector('#enforce_transient').value = 'true';
-            document.querySelector('#enforce_transient').checked = true;
-        }
-        else
-        {
-            document.querySelector('#enforce_transient').value = 'false';
-        }
-    }
-    function set_transient_before_time(result)
-    {
-        document.querySelector('#transient_before_time').value = result.transient_before_time || DEFAULT_transient_before_time;
-    }
-    function set_notif_timeout(result)
-    {
-        document.querySelector('#notif_timeout').value = result.notif_timeout || DEFAULT_notif_timeout;
     }
 
     function onError(error)
@@ -81,24 +164,34 @@ function restorePrefs()
         console.log(`Error: ${error}`);
     }
 
-    var get_ignore_tmp = browser.storage.local.get('ignore_tmp');
-    get_ignore_tmp.then(set_ignore_tmp, onError);
-    var get_enforce_transient = browser.storage.local.get('enforce_transient');
-    get_enforce_transient.then(set_enforce_transient, onError);
-    var get_transient_before_time = browser.storage.local.get('transient_before_time');
-    get_transient_before_time.then(set_transient_before_time, onError);
-    var get_notif_timeout = browser.storage.local.get('notif_timeout');
-    get_notif_timeout.then(set_notif_timeout, onError);
+    var get_preferences = browser.storage.local.get();
+    get_preferences.then(setAllValues, onError);
 }
 
-function submitForm(e)
+function fieldUpdated(e)
 {
     document.querySelector('#savePrefs').click();
 }
 
-document.addEventListener('DOMContentLoaded', restorePrefs);
-document.querySelector('#prefsForm').addEventListener('submit', savePrefs);
-document.querySelector('#ignore_tmp').addEventListener('change', submitForm);
-document.querySelector('#enforce_transient').addEventListener('change', submitForm);
-document.querySelector('#transient_before_time').addEventListener('change', submitForm);
-document.querySelector('#notif_timeout').addEventListener('change', submitForm);
+function restoreDefaults()
+{
+    browser.storage.local.clear();
+    restorePrefs();
+}
+
+function submitPrefsForm(e)
+{
+    e.preventDefault();
+    if (e.explicitOriginalTarget.id == 'restoreDefaults')
+    {
+        restoreDefaults();
+    }
+    else
+    {
+        savePrefs();
+    }
+}
+
+document.addEventListener('DOMContentLoaded', waitForConfigLoad);
+document.querySelector('#restoreDefaults').addEventListener('submit', restoreDefaults);
+document.querySelector('#prefsForm').addEventListener('submit', submitPrefsForm);
