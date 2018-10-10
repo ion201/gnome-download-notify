@@ -126,7 +126,12 @@ function dlComplete(download_list)
 {
     download = download_list[0];
 
-    var filepath = download.filename.split('/');
+    var pathSep = '/';    // Linux / (probably) OSX
+    if (download.filename.indexOf('/') == -1)
+    {
+        pathSep = '\\'; // Windoze
+    }
+    var filepath = download.filename.split(pathSep);
     var filename = filepath.pop(filepath.length-1);
 
     var timeMs = (new Date()).getTime() - (new Date(download.startTime)).getTime();
@@ -139,7 +144,7 @@ function dlComplete(download_list)
     {
         summary = 'Download Complete: "' + filename + '"';
         body = 'File: "' + filename + '"\n';
-        body += 'Saved in ' + filepath.join('/');
+        body += 'Saved in ' + filepath.join(pathSep);
     }
     else if (download.error != null && !isAlreadyNotified)
     {
