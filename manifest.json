@@ -2,7 +2,7 @@
     "manifest_version": 2,
     "name": "Download Notifications",
     "description": "Notification integration for downloads.",
-    "version": "1.0.5",
+    "version": "1.0.6",
     "permissions": ["downloads", "storage", "notifications"],
 
     "applications": {
