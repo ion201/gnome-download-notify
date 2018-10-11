@@ -38,6 +38,6 @@
         "defaultValue": 0,
         "min": 0,
         "name": "Don't Notify For Quick Downloads",
-        "description": "Don't send a notification for downloads quicker than this time (in seconds). If set to zero, no notifiations will be skipped. "
+        "description": "Don't send a notification for downloads quicker than this time (in seconds). If set to zero, no notifications will be skipped. "
     }
 }
