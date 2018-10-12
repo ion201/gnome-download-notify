@@ -126,18 +126,13 @@ function restorePrefs()
             }
             if (window.addonConfig[key].type == 'bool')
             {
-                var isEnabled;
                 if (result[key] !== undefined)
                 {
-                    isEnabled = result[key]
+                    inputElem.checked = result[key];
                 }
                 else
                 {
-                    isEnabled = window.addonConfig[key].defaultValue;
-                }
-                if (isEnabled)
-                {
-                    inputElem.checked = true;
+                    inputElem.checked = window.addonConfig[key].defaultValue;
                 }
             }
             else if (window.addonConfig[key].type == 'int')
