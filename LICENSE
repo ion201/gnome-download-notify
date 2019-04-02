@@ -1,6 +1,23 @@
-The MIT License (MIT)
+Additional Licenses:
+ding.oga
+	Copyright: Dr. Richard Boulanger et al
+	URL: http://www.archive.org/details/Berklee44v11
+	License: CC-BY Attribution 3.0 Unported
 
-Copyright (c) 2015-2017 Nate Simon
+pop.oga
+	Copyright: Lucas McCallister
+	URL: http://www.freesound.org/samplesViewSingle.php?id=67091
+	License: CC-BY-SA
+
+message.oga
+	Copyright: Ivica Bukvic
+	URL: http://gnome-look.org/content/show.php/%22Borealis%22+sound+theme?content=12584
+	License: CC-BY-SA
+
+
+Primary license:
+The MIT License (MIT)
+Copyright (c) 2015 Nate Simon
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

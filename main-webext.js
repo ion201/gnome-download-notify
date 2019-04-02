@@ -1,8 +1,9 @@
 
 function reqListener(e)
 {
-    window.addonConfig = JSON.parse(this.responseText);
+    window.downloadNotify.addonConfig = JSON.parse(this.responseText);
 }
+window.downloadNotify = new Object;
 var dataReq = new XMLHttpRequest();
 dataReq.onload = reqListener;
 dataReq.open('GET', 'pref/config.json');
@@ -19,9 +20,9 @@ function loadPrefs(callback)
     var prefs = Object();
     function getAllPrefs(result)
     {
-        for (var key in window.addonConfig)
+        for (var key in window.downloadNotify.addonConfig)
         {
-            prefs[key] = window.addonConfig[key].defaultValue;
+            prefs[key] = window.downloadNotify.addonConfig[key].defaultValue;
         }
         for (var key in result)
         {
@@ -37,6 +38,51 @@ function loadPrefs(callback)
     var getter;
     getter = browser.storage.local.get();
     getter.then(getAllPrefs, onError);
+}
+
+
+function checkConfigVer(prefs)
+{
+    prefsUpdates = {
+        1: function(prefs){
+            // 1: initial version, do nothing
+            prefs.config_version = 1;
+        },
+        2: function(prefs){
+            // 2: Reserved for next version
+            prefs.config_version = 2;
+        },
+    };
+
+    if (window.downloadNotify.addonConfig === undefined)
+    {
+        window.setTimeout(checkConfigVer, 10);
+    }
+    else if (prefs == undefined)
+    {
+        loadPrefs(checkConfigVer);
+    }
+    else
+    {
+        var defaultVer = window.downloadNotify.addonConfig.config_version.defaultValue;
+        var currentVer = prefs.config_version;
+        while (currentVer++ < defaultVer)
+        {
+            prefsUpdates[currentVer](prefs);
+        }
+        browser.storage.local.set(prefs);
+    }
+}
+
+
+function playSoundAsset(target)
+{
+    if (target.toLowerCase() != 'none')
+    {
+        var audioElem = document.createElement('audio');
+        audioElem.src = browser.extension.getURL('assets/' + target);
+        audioElem.play();
+    }
 }
 
 
@@ -73,6 +119,8 @@ function notify(summary, body, timeMs, filepath, downloadId)
                     browser.notifications.clear(notifId);
                 }, prefs.notif_timeout);
         }
+
+        playSoundAsset(prefs.notif_sound);
     }
 }
 
@@ -178,6 +226,6 @@ function onDlChange(download)
     query.then(dlComplete, onSearchError);
 }
 
-
+checkConfigVer();
 browser.downloads.onChanged.addListener(onDlChange);
 browser.notifications.onClicked.addListener(onNotifClicked);

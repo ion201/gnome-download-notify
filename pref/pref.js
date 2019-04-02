@@ -1,7 +1,11 @@
 
+window.downloadNotify = new Object;
+window.downloadNotify.addonConfig = undefined;
+window.downloadNotify.configVerUpdated = undefined;
+
 function reqListener(e)
 {
-    window.addonConfig = JSON.parse(this.responseText);
+    window.downloadNotify.addonConfig = JSON.parse(this.responseText);
 }
 var dataReq = new XMLHttpRequest();
 dataReq.onload = reqListener;
@@ -10,7 +14,7 @@ dataReq.open('GET', 'config.json');
 dataReq.send();
 function waitForConfigLoad()
 {
-    if (window.addonConfig)
+    if (window.downloadNotify.addonConfig)
     {
         buildWebpage();
         restorePrefs();
@@ -21,36 +25,49 @@ function waitForConfigLoad()
     }
 }
 
+function onError(error)
+{
+    console.log(`Error: ${error}`);
+}
+
 
 function buildWebpage()
 {
     var lastRow = document.querySelector('#prefsLastRow');
+    var globalConfig = window.downloadNotify.addonConfig;
 
-    for (var key in window.addonConfig)
+    for (var key in globalConfig)
     {
-        var name = window.addonConfig[key].name;
+        var name = globalConfig[key].name;
         var inputId = key;
-        var description = window.addonConfig[key].description;
-        var typeSpecific = "";
-        if (window.addonConfig[key].type == 'bool')
+        var description = globalConfig[key].description;
+        var inputField = "";
+        if (globalConfig[key].type == 'bool')
         {
-            typeSpecific = 'type="checkbox"';
+            inputField = `<input type="checkbox" id="${inputId}" >`;
         }
-        else if (window.addonConfig[key].type == 'int')
+        else if (globalConfig[key].type == 'int')
         {
-            typeSpecific = 'type="number"';
-            if (window.addonConfig[key].min !== undefined)
+            inputField = `<input type="number" id="${inputId}"`;
+            if (globalConfig[key].min  !== undefined) inputField += ` min="${globalConfig[key].min}"`;
+            if (globalConfig[key].max  !== undefined) inputField += ` max="${globalConfig[key].max}"`;
+            if (globalConfig[key].step !== undefined) inputField += ` step="${globalConfig[key].step}"`;
+            inputField += ' >';
+        }
+        else if (globalConfig[key].type == 'select')
+        {
+            inputField = `<select id="${inputId}">`
+            for (var idx in globalConfig[key].options)
             {
-                typeSpecific += ` min="${window.addonConfig[key].min}"`;
+                var opt = globalConfig[key].options[idx];
+                inputField += `<option value="${opt}">${opt}</option>`;
             }
-            if (window.addonConfig[key].max !== undefined)
-            {
-                typeSpecific += ` max="${window.addonConfig[key].max}"`;
-            }
-            if (window.addonConfig[key].step !== undefined)
-            {
-                typeSpecific += ` step="${window.addonConfig[key].step}"`;
-            }
+            inputField += `</select>`;
+        }
+        else
+        {
+            console.log('buildWebpage() Skipping key: ' + key);
+            continue;
         }
         var tableRow = `
         <tr>
@@ -62,7 +79,7 @@ function buildWebpage()
                 </label>
             </td>
             <td class="col2">
-                <input ${typeSpecific} id="${inputId}" >
+                ${inputField}
             </td>
         </tr>`;
         var template = document.createElement('template');
@@ -73,10 +90,16 @@ function buildWebpage()
 }
 
 
-function savePrefs()
+function savePrefs(preferences)
 {
-    var preferences = Object();
-    for (var key in window.addonConfig)
+    if (preferences === undefined)
+    {
+        browser.storage.local.get().then(savePrefs, onError);
+        return;
+    }
+
+    var globalConfig = window.downloadNotify.addonConfig;
+    for (var key in globalConfig)
     {
         var inputElem = document.querySelector('#' + key);
         if (inputElem === undefined)
@@ -84,27 +107,35 @@ function savePrefs()
             console.log("DL NOTIFICATIONS ERROR - config element not found in page: " + key);
             continue;
         }
-        if (window.addonConfig[key].type == 'bool')
+        if (globalConfig[key].type == 'bool')
         {
             preferences[key] = inputElem.checked || false;
         }
-        else if (window.addonConfig[key].type == 'int')
+        else if (globalConfig[key].type == 'int')
         {
             preferences[key] = inputElem.value;
-            if ((window.addonConfig[key].min !== undefined)
-                    && (preferences[key] < window.addonConfig[key].min))
+            if ((globalConfig[key].min !== undefined)
+                    && (preferences[key] < globalConfig[key].min))
             {
-                preferences[key] = window.addonConfig[key].min;
+                preferences[key] = globalConfig[key].min;
             }
-            if ((window.addonConfig[key].max !== undefined)
-                    && (preferences[key] > window.addonConfig[key].max))
+            if ((globalConfig[key].max !== undefined)
+                    && (preferences[key] > globalConfig[key].max))
             {
-                preferences[key] = window.addonConfig[key].max;
+                preferences[key] = globalConfig[key].max;
             }
+        }
+        else if (globalConfig[key].type == 'select')
+        {
+            preferences[key] = inputElem.selectedOptions[0].value;
+        }
+        else if (globalConfig[key].type == 'internal')
+        {
+            // Do nothing.
         }
         else
         {
-            console.log("DL NOTIFICATIONS ERROR - config type not recognized: " + window.addonConfig[key].type);
+            console.log("DL NOTIFICATIONS ERROR - config type not recognized: " + globalConfig[key].type);
             continue;
         }
     }
@@ -116,47 +147,59 @@ function restorePrefs()
 {
     function setAllValues(result)
     {
-        for (var key in window.addonConfig)
+        var globalConfig = window.downloadNotify.addonConfig;
+        for (var key in globalConfig)
         {
+            if (globalConfig[key].type == 'internal')
+            {
+                continue;
+            }
             var inputElem = document.querySelector('#' + key);
-            if (inputElem === undefined)
+            if (!inputElem)
             {
                 console.log("DL NOTIFICATIONS ERROR - config element not found in page: " + key);
                 continue;
             }
-            if (window.addonConfig[key].type == 'bool')
+            if (globalConfig[key].type == 'bool')
             {
+                inputElem.checked = globalConfig[key].defaultValue;
                 if (result[key] !== undefined)
                 {
                     inputElem.checked = result[key];
                 }
-                else
-                {
-                    inputElem.checked = window.addonConfig[key].defaultValue;
-                }
             }
-            else if (window.addonConfig[key].type == 'int')
+            else if (globalConfig[key].type == 'int')
             {
+                inputElem.value = globalConfig[key].defaultValue;
                 if (result[key] !== undefined)
                 {
                     inputElem.value = result[key];
                 }
-                else
+            }
+            else if (globalConfig[key].type == 'select')
+            {
+                var defaultIdx = 0;
+                var currentIdx = undefined;
+                for (var idx = 0; idx < inputElem.childElementCount; idx++)
                 {
-                    inputElem.value = window.addonConfig[key].defaultValue;
+                    if (inputElem[idx].value == globalConfig[key].defaultValue)
+                    {
+                        defaultIdx = idx;
+                    }
+                    else if (inputElem[idx].value == result[key])
+                    {
+                        currentIdx = idx;
+                    }
                 }
+                currentIdx = (currentIdx !== undefined) ? currentIdx : defaultIdx;
+                inputElem[currentIdx].selected = true;
             }
             else
             {
-                console.log("DL NOTIFICATIONS ERROR - config type not recognized: " + window.addonConfig[key].type);
+                console.log("DL NOTIFICATIONS ERROR - config type not recognized: " + globalConfig[key].type);
                 continue;
             }
         }
-    }
-
-    function onError(error)
-    {
-        console.log(`Error: ${error}`);
     }
 
     var get_preferences = browser.storage.local.get();
