@@ -1,20 +1,3 @@
-Additional Licenses:
-ding.oga
-	Copyright: Dr. Richard Boulanger et al
-	URL: http://www.archive.org/details/Berklee44v11
-	License: CC-BY Attribution 3.0 Unported
-
-pop.oga
-	Copyright: Lucas McCallister
-	URL: http://www.freesound.org/samplesViewSingle.php?id=67091
-	License: CC-BY-SA
-
-message.oga
-	Copyright: Ivica Bukvic
-	URL: http://gnome-look.org/content/show.php/%22Borealis%22+sound+theme?content=12584
-	License: CC-BY-SA
-
-
 Primary license:
 The MIT License (MIT)
 Copyright (c) 2015 Nate Simon
@@ -36,3 +19,14 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+Additional Licenses:
+ding.oga
+	Copyright: Dr. Richard Boulanger et al
+	URL: http://www.archive.org/details/Berklee44v11
+	License: CC-BY Attribution 3.0 Unported
+
+pop.oga
+	Copyright: Ivica Bukvic
+	URL: http://gnome-look.org/content/show.php/%22Borealis%22+sound+theme?content=12584
+	License: CC-BY-SA
