@@ -15,6 +15,14 @@ var notified_dls = []
 // Note: This only stores a hash, not any details
 var RECENT_DOWNLOADS_MAX_SIZE = 32
 
+
+var SOUND_NAME_TO_FILE = {
+    bell: 'bell.ogg',
+    ding: 'ding.oga',
+    pop: 'pop.oga'
+}
+
+
 function loadPrefs(callback)
 {
     var prefs = Object();
@@ -77,10 +85,11 @@ function checkConfigVer(prefs)
 
 function playSoundAsset(target)
 {
-    if (target.toLowerCase() != 'none')
+    target = target.toLowerCase();
+    if (SOUND_NAME_TO_FILE.hasOwnProperty(target))
     {
         var audioElem = document.createElement('audio');
-        audioElem.src = browser.extension.getURL('assets/' + target);
+        audioElem.src = browser.extension.getURL('assets/' + SOUND_NAME_TO_FILE[target]);
         audioElem.play();
     }
 }
