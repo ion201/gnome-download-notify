@@ -231,5 +231,5 @@ function submitPrefsForm(e)
 }
 
 document.addEventListener('DOMContentLoaded', waitForConfigLoad);
-document.querySelector('#restoreDefaults').addEventListener('submit', restoreDefaults);
-document.querySelector('#prefsForm').addEventListener('submit', submitPrefsForm);
+document.querySelector('#restoreDefaults').addEventListener('click', restoreDefaults);
+document.querySelector('#prefsForm').addEventListener('click', submitPrefsForm);
