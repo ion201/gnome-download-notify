@@ -11,9 +11,12 @@ dataReq.send();
 
 var NOTIF_IDENTIFIER = '-notif';
 
-var notified_dls = []
+var notified_dls = [];
 // Note: This only stores a hash, not any details
-var RECENT_DOWNLOADS_MAX_SIZE = 32
+var RECENT_DOWNLOADS_MAX_SIZE = 32;
+var AUDIO_TIMEOUT_MS = 10 * 1000;
+
+var audio_stream = document.createElement('audio');
 
 
 var SOUND_NAME_TO_FILE = {
@@ -83,14 +86,35 @@ function checkConfigVer(prefs)
 }
 
 
-function playSoundAsset(target)
+function playSoundAsset(prefs)
 {
-    target = target.toLowerCase();
-    if (SOUND_NAME_TO_FILE.hasOwnProperty(target))
+    function play(soundFile)
     {
-        var audioElem = document.createElement('audio');
-        audioElem.src = browser.extension.getURL('assets/' + SOUND_NAME_TO_FILE[target]);
-        audioElem.play();
+        audio_stream.src = soundFile;
+        audio_stream.play();
+        setTimeout(function() {
+            // Automatically stop after X seconds, in case the user's sound byte is too long
+            if (!audio_stream.ended)
+            {
+                audio_stream.pause();
+            }
+        }, AUDIO_TIMEOUT_MS);
+    }
+
+    target = prefs.notif_sound.toLowerCase();
+    var soundFile = undefined;
+    if (target == 'user uploaded' && prefs.user_upload_sound)
+    {
+        var reader = new FileReader();
+        reader.onload = function(event) {
+            play(event.target.result);
+        }
+        reader.readAsDataURL(prefs.user_upload_sound);
+    }
+    else if (SOUND_NAME_TO_FILE.hasOwnProperty(target))
+    {
+        soundFile = browser.runtime.getURL('assets/' + SOUND_NAME_TO_FILE[target]);
+        play(soundFile);
     }
 }
 
@@ -101,23 +125,37 @@ function notify(summary, body, timeMs, filepath, downloadId)
 
     function doNotifyWithPrefs(prefs)
     {
+        // Check conditions where we would not notify:
         if (prefs.ignore_tmp)
         {
             if (filepath.startsWith('/tmp') ||  // Linux / (probably) OSX
                     (filepath.indexOf('Local\\Temp') != -1)) // Windoze
             {
+                // It's a temp file, don't notify
                 return;
             }
         }
         if (timeMs < prefs.no_notify_shorter_than*1000)
         {
+            // Very quick download, don't notify
             return;
+        }
+        var patterns = prefs.ignore_filenames.split(' ');
+        var filename = filepath.replace(/^.*[\\\/]/, '')
+        for (var idx in patterns)
+        {
+            if (patterns[idx] == '') { continue; }
+            if (filepath.indexOf(patterns[idx]) != -1)
+            {
+                // Matching one of the user's ignore patterns
+                return;
+            }
         }
 
         var notifId = downloadId.toString() + NOTIF_IDENTIFIER;
         var notif = browser.notifications.create(notifId, {
                         'type': 'basic',
-                        'iconUrl': browser.extension.getURL('assets/default64.png'),
+                        'iconUrl': browser.runtime.getURL('assets/default64.png'),
                         'title': summary,
                         'message': body
                     });
@@ -129,7 +167,7 @@ function notify(summary, body, timeMs, filepath, downloadId)
                 }, prefs.notif_timeout);
         }
 
-        playSoundAsset(prefs.notif_sound);
+        playSoundAsset(prefs);
     }
 }
 

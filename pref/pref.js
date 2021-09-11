@@ -3,6 +3,8 @@ window.downloadNotify = new Object;
 window.downloadNotify.addonConfig = undefined;
 window.downloadNotify.configVerUpdated = undefined;
 
+var FILE_STORE_NAME = 'stored-files';
+
 function reqListener(e)
 {
     window.downloadNotify.addonConfig = JSON.parse(this.responseText);
@@ -42,6 +44,9 @@ function buildWebpage()
         var inputId = key;
         var description = globalConfig[key].description;
         var inputField = "";
+        var extraEventListeners = [
+          {id: inputId, event: 'change', function: fieldUpdated}
+        ];
         if (globalConfig[key].type == 'bool')
         {
             inputField = `<input type="checkbox" id="${inputId}" >`;
@@ -49,20 +54,42 @@ function buildWebpage()
         else if (globalConfig[key].type == 'int')
         {
             inputField = `<input type="number" id="${inputId}"`;
-            if (globalConfig[key].min  !== undefined) inputField += ` min="${globalConfig[key].min}"`;
-            if (globalConfig[key].max  !== undefined) inputField += ` max="${globalConfig[key].max}"`;
-            if (globalConfig[key].step !== undefined) inputField += ` step="${globalConfig[key].step}"`;
+            if (globalConfig[key].min  !== undefined) { inputField += ` min="${globalConfig[key].min}"`; }
+            if (globalConfig[key].max  !== undefined) { inputField += ` max="${globalConfig[key].max}"`; }
+            if (globalConfig[key].step !== undefined) { inputField += ` step="${globalConfig[key].step}"`; }
+            if (globalConfig[key].placeholder !== undefined) { inputField += ` placeholder="${globalConfig[key].placeholder}"`; }
             inputField += ' >';
         }
         else if (globalConfig[key].type == 'select')
         {
-            inputField = `<select id="${inputId}">`
+            inputField = `<select id="${inputId}">`;
             for (var idx in globalConfig[key].options)
             {
                 var opt = globalConfig[key].options[idx];
                 inputField += `<option value="${opt}">${opt}</option>`;
             }
             inputField += `</select>`;
+        }
+        else if (globalConfig[key].type == 'string')
+        {
+            inputField = `<input type="text" id="${inputId}"`;
+            if (globalConfig[key].placeholder !== undefined) { inputField += ` placeholder="${globalConfig[key].placeholder}"`; }
+            inputField += '>';
+        }
+        else if (globalConfig[key].type == 'file')
+        {
+            inputField = `<input type="file" id="${inputId}"`;
+            if (globalConfig[key].accept !== undefined) { inputField += ` accept="${globalConfig[key].accept}"`; }
+            inputField += `><p id=${inputId}_value>${globalConfig[key].defaultValue}</p>`;
+            inputField += `<input type="button" value="Reset" id=${inputId}_reset for=${inputId}>`;
+            extraEventListeners.push({
+              id: `${inputId}_reset`,
+              event: 'click',
+              function: function(event) {
+                document.getElementById(event.target.getAttribute('for')).trigger_reset = true;
+                fieldUpdated();
+              }
+            });
         }
         else
         {
@@ -84,8 +111,14 @@ function buildWebpage()
         </tr>`;
         var template = document.createElement('template');
         template.innerHTML = tableRow.trim();
-        template.content.firstChild.addEventListener('change', fieldUpdated);
         lastRow.parentNode.insertBefore(template.content.firstChild, lastRow);
+        for (var idx in extraEventListeners)
+        {
+          var id = extraEventListeners[idx].id;
+          var evt = extraEventListeners[idx].event;
+          var func = extraEventListeners[idx].function;
+          document.getElementById(id).addEventListener(evt, func);
+        }
     }
 }
 
@@ -113,7 +146,7 @@ function savePrefs(preferences)
         }
         else if (globalConfig[key].type == 'int')
         {
-            preferences[key] = inputElem.value;
+            preferences[key] = inputElem.value || globalConfig[key].defaultValue;
             if ((globalConfig[key].min !== undefined)
                     && (preferences[key] < globalConfig[key].min))
             {
@@ -129,13 +162,33 @@ function savePrefs(preferences)
         {
             preferences[key] = inputElem.selectedOptions[0].value;
         }
+        else if (globalConfig[key].type == 'string')
+        {
+            preferences[key] = inputElem.value;
+        }
+        else if (globalConfig[key].type == 'file')
+        {
+            if (inputElem.trigger_reset)
+            {
+                inputElem.trigger_reset = undefined;
+                preferences[key] = undefined;
+                document.getElementById(`${inputElem.id}_value`).innerText = globalConfig[key].defaultValue;
+            }
+            else if (inputElem.files.length > 0)
+            {
+                var file = inputElem.files[0];
+                preferences[key] = file;
+                document.getElementById(`${inputElem.id}_value`).innerText = file.name;
+            }
+            inputElem.value = "";
+        }
         else if (globalConfig[key].type == 'internal')
         {
             // Do nothing.
         }
         else
         {
-            console.log("DL NOTIFICATIONS ERROR - config type not recognized: " + globalConfig[key].type);
+            console.log("DL NOTIF SAVE ERROR - config type not recognized: " + key + "/" + globalConfig[key].type);
             continue;
         }
     }
@@ -194,9 +247,26 @@ function restorePrefs()
                 currentIdx = (currentIdx !== undefined) ? currentIdx : defaultIdx;
                 inputElem[currentIdx].selected = true;
             }
+            else if (globalConfig[key].type == 'string')
+            {
+                inputElem.value = globalConfig[key].defaultValue;
+                if (result[key] !== undefined)
+                {
+                    inputElem.value = result[key];
+                }
+            }
+            else if (globalConfig[key].type == 'file')
+            {
+                var filename = globalConfig[key].defaultValue;
+                if (result[key] !== undefined)
+                {
+                    filename = result[key].name;
+                }
+                document.getElementById(`${inputElem.id}_value`).innerText = filename;
+            }
             else
             {
-                console.log("DL NOTIFICATIONS ERROR - config type not recognized: " + globalConfig[key].type);
+                console.log("DL NOTIF RESTORE ERROR - config type not recognized: " + key + "/" + globalConfig[key].type);
                 continue;
             }
         }

@@ -23,6 +23,7 @@
     {
         "type": "int",
         "defaultValue": 0,
+        "placeholder": 0,
         "min": 0,
         "step": 100,
         "name": "Automatically dismiss quick downloads",
@@ -32,6 +33,7 @@
     {
         "type": "int",
         "defaultValue": 5000,
+        "placeholder": 5000,
         "min": 100,
         "step": 100,
         "name": "Notification Timeout",
@@ -41,16 +43,33 @@
     {
         "type": "int",
         "defaultValue": 0,
+        "placeholder": 0,
         "min": 0,
         "name": "Don't Notify For Quick Downloads",
-        "description": "Don't send a notification for downloads quicker than this time (in seconds). If set to zero, no notifications will be skipped. "
+        "description": "Don't send a notification for downloads quicker than this time (in seconds). If set to zero, no notifications will be skipped."
     },
     "notif_sound":
     {
         "type": "select",
         "defaultValue": "None",
-        "options": ["None", "bell", "ding", "pop"],
+        "options": ["None", "bell", "ding", "pop", "user uploaded"],
         "name": "Audio Notifications",
         "description": "Play an audio cue with every notification"
+    },
+    "user_upload_sound":
+    {
+        "type": "file",
+        "defaultValue": "",
+        "name": "Custom sound file",
+        "description": "Select a custom sound file for notifications",
+        "accept": "audio/*"
+    },
+    "ignore_filenames":
+    {
+        "type": "string",
+        "defaultValue": "",
+        "placeholder": "Example: .jpg .png",
+        "name": "Ignored filenames",
+        "description": "A space-separated list of ignore patterns. Notifications will not be sent for files containing any of the listed patterns."
     }
 }
