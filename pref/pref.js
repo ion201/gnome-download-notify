@@ -14,6 +14,7 @@ dataReq.onload = reqListener;
 dataReq.overrideMimeType("application/json");
 dataReq.open('GET', 'config.json');
 dataReq.send();
+
 function waitForConfigLoad()
 {
     if (window.downloadNotify.addonConfig)
@@ -96,6 +97,11 @@ function buildWebpage()
             console.log('buildWebpage() Skipping key: ' + key);
             continue;
         }
+        if (key == "notif_sound")
+        {
+            // Special case, add a button to play the sound right here
+            inputField += ` <button id="notif_sound_button">Play</button>`;
+        }
         var tableRow = `
         <tr>
             <td class="col1">
@@ -119,6 +125,12 @@ function buildWebpage()
           var func = extraEventListeners[idx].function;
           document.getElementById(id).addEventListener(evt, func);
         }
+    }
+
+    var elem = document.getElementById("notif_sound_button");
+    if (elem != null)
+    {
+        elem.onclick = function() { loadPrefs(playSoundAsset); }
     }
 }
 

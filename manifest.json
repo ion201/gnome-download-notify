@@ -13,7 +13,7 @@
     },
 
     "background": {
-        "scripts": ["main-webext.js"]
+        "scripts": ["common.js", "main-webext.js"]
     },
 
     "icons": {
